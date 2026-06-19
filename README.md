@@ -57,17 +57,17 @@ The cleaned `customer_reviews` table is pulled from SQL Server into Python (via 
 The report has 4 connected pages, all filterable by **Year** and **Month**, with a product-level slicer:
 
 1. **Overview** — high-level KPIs: 9.57% conversion rate, 9M views, 2M clicks, 414K likes, 3.69 avg. rating, with trends by month and product.
-![Overview](https://github.com/Amruthaashokan5/Data-Analysis-Project--Market-Analysis/blob/main/Episode 4-Overview-Dashboard.png)
+
 ## Overview
 
 2. **Conversion Details** — purchase funnel (View → Click → Drop-off → Purchase), monthly conversion rate trend, and a product × month conversion-rate matrix.
-![Conversion Details](docs/screenshots/conversion_details.png)
+
 
 3. **Social Media Details** — views/clicks/likes trend over time, content-type performance (Blog, Social Media, Video), and a product × month engagement matrix.
-![Social Media Details](docs/screenshots/social_media_details.png)
+
 
 4. **Customer Reviews Details** — sentiment category distribution, sentiment trend by month, and a rating-vs-review-count scatter plot by sentiment.
-![Customer Reviews Details](docs/screenshots/customer_reviews_details.png)
+
 
 ## 🔑 Key Insights
 
