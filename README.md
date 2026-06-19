@@ -1,4 +1,4 @@
-# Data-Analysis-Project--Market-Analysis
+
 # 🏃‍♂️ Sports Retail Market Analysis — SQL · Python · Power BI
 
 End-to-end data analytics project that takes raw, messy e-commerce data for a sports & fitness retailer and turns it into an interactive Power BI dashboard covering **conversion performance, social media engagement, and customer sentiment**.
@@ -57,7 +57,8 @@ The cleaned `customer_reviews` table is pulled from SQL Server into Python (via 
 The report has 4 connected pages, all filterable by **Year** and **Month**, with a product-level slicer:
 
 1. **Overview** — high-level KPIs: 9.57% conversion rate, 9M views, 2M clicks, 414K likes, 3.69 avg. rating, with trends by month and product.
-![Overview](docs/screenshots/overview.png)
+![Overview](https://github.com/Amruthaashokan5/Data-Analysis-Project--Market-Analysis/blob/main/Episode 4-Overview-Dashboard.png)
+## Overview
 
 2. **Conversion Details** — purchase funnel (View → Click → Drop-off → Purchase), monthly conversion rate trend, and a product × month conversion-rate matrix.
 ![Conversion Details](docs/screenshots/conversion_details.png)
