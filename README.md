@@ -88,21 +88,19 @@ SQL Server (raw tables)
 
 ## 📁 Repo Structure
 
-
-├── sql/
-│   ├── 01_join_customer_geography.sql
-│   ├── 02_price_categorization.sql
-│   ├── 03_clean_review_text.sql
-│   ├── 04_clean_engagement_data.sql
-│   └── 05_dedupe_customer_journey.sql
-├── python/
-│   └── sentiment_analysis.py   # pulls reviews from SQL, scores with VADER, writes CSV + SQL table back
-├── data/
-│   └── fact_customer_reviews_with_sentiment.csv
-├── powerbi/
-│   └── Market_Analysis_Dashboard.pbix
-└── README.md
-
+- **sql/**
+  - 01_join_customer_geography.sql
+  - 02_price_categorization.sql
+  - 03_clean_review_text.sql
+  - 04_clean_engagement_data.sql
+  - 05_dedupe_customer_journey.sql
+- **python/**
+  - sentiment_analysis.py
+- **data/**
+  - fact_customer_reviews_with_sentiment.csv
+- **powerbi/**
+  - Market_Analysis_Dashboard.pbix
+- README.md
 
 ## 🚀 How to Reproduce
 
