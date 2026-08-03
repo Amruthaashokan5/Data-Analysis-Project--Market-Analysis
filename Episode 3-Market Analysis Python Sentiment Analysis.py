@@ -5,6 +5,10 @@ import pyodbc
 import nltk
 from sqlalchemy import create_engine
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+from openai import OpenAI
 
 # Download the VADER lexicon for sentiment analysis if not already present.
 nltk.download('vader_lexicon')
@@ -84,6 +88,217 @@ customer_reviews_df['SentimentCategory'] = customer_reviews_df.apply(
 # Apply sentiment bucketing to categorize scores into defined ranges
 customer_reviews_df['SentimentBucket'] = customer_reviews_df['SentimentScore'].apply(sentiment_bucket)
 
+total_reviews = len(customer_reviews_df)
+
+average_rating = customer_reviews_df["Rating"].mean()
+
+average_sentiment = customer_reviews_df["SentimentScore"].mean()
+
+positive = (
+    customer_reviews_df["SentimentCategory"] == "Positive"
+).sum()
+
+negative = (
+    customer_reviews_df["SentimentCategory"] == "Negative"
+).sum()
+
+neutral = (
+    customer_reviews_df["SentimentCategory"] == "Neutral"
+).sum()
+# Calculate percentages
+positive_percent = (positive / total_reviews) * 100
+negative_percent = (negative / total_reviews) * 100
+neutral_percent = (neutral / total_reviews) * 100
+# ======================================================
+# Load OpenRouter API
+# ======================================================
+
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=os.getenv("OPENROUTER_API_KEY"),
+)
+
+# ======================================================
+# AI Prompt
+# ======================================================
+
+
+prompt = f"""
+You are a Senior Marketing Data Analyst preparing an executive report for business stakeholders.
+
+
+Analyze ONLY the KPI values provided below.
+
+IMPORTANT RULES:
+
+- Use ONLY the data provided.
+- Do NOT invent reasons or assumptions.
+- Do NOT speculate about customer behavior.
+- Write in professional business English.
+- Keep the report concise.
+- Mention percentages wherever appropriate.
+
+Marketing KPIs
+
+Total Reviews: {total_reviews}
+
+Average Rating: {average_rating:.2f}/5
+
+Average Sentiment Score: {average_sentiment:.2f}
+
+Positive Reviews: {positive} ({positive_percent:.1f}%)
+
+Negative Reviews: {negative} ({negative_percent:.1f}%)
+
+Neutral Reviews: {neutral} ({neutral_percent:.1f}%)
+
+Generate the following sections exactly.
+
+## Executive Summary
+Write 4-5 sentences that summarize the overall customer feedback using only the KPIs above.
+
+## Business Insights
+Provide exactly 3 bullet points.
+
+Rules:
+- Each insight must be directly supported by the KPI values.
+- Mention percentages or counts whenever possible.
+- Do not speculate or infer reasons behind the metrics.
+- Do not use words like "likely", "appears", "suggests", or "polarized".
+
+## Recommendations
+Provide exactly 3 practical recommendations.
+
+Rules:
+- Base every recommendation only on the KPI values.
+- Use action-oriented language such as Analyze, Review, Monitor, Maintain, or Improve.
+- Do not assume causes such as product quality, pricing, shipping, customer expectations, or service issues unless they are explicitly provided in the data.
+"""
+
+# ======================================================
+# Generate AI Summary
+# ======================================================
+
+try:
+    response = client.chat.completions.create(
+        model="google/gemma-4-26b-a4b-it:free",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
+
+    summary = response.choices[0].message.content
+
+    print("\n========== AI SUMMARY ==========\n")
+    print(summary)
+
+    # with open(
+    #     r"C:\Users\asus\Desktop\AI_Summary.txt",
+    #     "w",
+    #     encoding="utf-8"
+    # ) as f:
+    #     f.write(summary)
+    project_path = r"C:\Users\asus\Desktop\Market Analysis Project"
+
+# Save AI Summary as CSV
+    import re
+
+# ==========================================
+# Split AI Summary into Sections
+# ==========================================
+
+# Executive Summary
+    exec_match = re.search(
+        r"## Executive Summary(.*?)## Business Insights",
+        summary,
+        re.S
+    )
+
+# Business Insights
+    insight_match = re.search(
+        r"## Business Insights(.*?)## Recommendations",
+        summary,
+        re.S
+    )
+
+# Recommendations
+    recommendation_match = re.search(
+        r"## Recommendations(.*)",
+        summary,
+        re.S
+    )
+
+    executive_summary = exec_match.group(1).strip() if exec_match else ""
+
+    business_insights = [
+        x.strip("* ").strip()
+        for x in insight_match.group(1).split("\n")
+        if x.strip()
+    ] if insight_match else []
+
+    recommendations = [
+        x.strip("* ").strip()
+        for x in recommendation_match.group(1).split("\n")
+        if x.strip()
+    ] if recommendation_match else []
+
+# ==========================================
+# Save Executive Summary
+# ==========================================
+
+    pd.DataFrame({
+        "Summary":[executive_summary]
+    }).to_csv(
+        os.path.join(project_path,"Executive_Summary.csv"),
+        index=False,
+        encoding="utf-8-sig"
+    )
+
+# ==========================================
+# Save Business Insights
+# ==========================================
+
+    pd.DataFrame({
+        "Insight":business_insights
+    }).to_csv(
+        os.path.join(project_path,"Business_Insights.csv"),
+        index=False,
+        encoding="utf-8-sig"
+    )
+
+# ==========================================
+# Save Recommendations
+# ==========================================
+
+    pd.DataFrame({
+        "Recommendation":recommendations
+    }).to_csv(
+        os.path.join(project_path,"Recommendations.csv"),
+        index=False,
+        encoding="utf-8-sig"
+    )
+
+    print("✅ Executive_Summary.csv created")
+    print("✅ Business_Insights.csv created")
+    print("✅ Recommendations.csv created")
+  #  print("\n✅ AI Summary saved successfully!")
+
+# except Exception as e:
+#     print("\n❌ AI Generation Error:")
+#     print(e)
+except Exception as e:
+    print("\n========== FULL ERROR ==========\n")
+
+    import traceback
+    traceback.print_exc()
+
+    print("\nException message:")
+    print(e)
 # Display the first few rows of the DataFrame with sentiment scores, categories, and buckets
 print(customer_reviews_df.head())
 
